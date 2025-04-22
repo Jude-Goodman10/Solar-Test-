@@ -35,23 +35,51 @@
   <pre id="result" style="white-space:pre-wrap;"></pre>
 
   <script>
-    const HOOK = "https://hook.eu2.make.com/ihkz7o9lyrf8isqklfn8dle9kdsuyzsc"; 
+    const HOOK = "https://hook.eu2.make.com/ihkz7o9lyrf8isqklfn8dle9kdsuyzsc";
 
     document.getElementById("solarForm").addEventListener("submit", async e => {
       e.preventDefault();
       const address = document.getElementById("addr").value.trim();
+
+      // Check if address is empty
+      if (!address) {
+        document.getElementById("result").textContent = "Please enter an address.";
+        return;
+      }
+
+      // Show loading state and disable button
       document.getElementById("result").textContent = "⏳ Running analysis…";
+      const button = document.querySelector("button");
+      button.disabled = true;
 
       try {
+        // Make the fetch request
         const r = await fetch(HOOK, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ address })
         });
-        const data = await r.json(); // Only works if Make webhook responds with data
-        document.getElementById("result").textContent = JSON.stringify(data, null, 2);
+
+        // Check if the response status is not OK (e.g., 400, 500)
+        if (!r.ok) {
+          const errorText = await r.text();
+          throw new Error(`Webhook error: ${r.status} - ${errorText}`);
+        }
+
+        // Handle response based on content type
+        const contentType = r.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+          const data = await r.json();
+          document.getElementById("result").textContent = JSON.stringify(data, null, 2);
+        } else {
+          const text = await r.text();
+          document.getElementById("result").textContent = text;
+        }
       } catch (err) {
         document.getElementById("result").textContent = "❌ Error: " + err.message;
+      } finally {
+        // Re-enable the button after the request completes
+        button.disabled = false;
       }
     });
   </script>
