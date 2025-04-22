@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Solar Demo</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      max-width: 420px;
+      margin: auto;
+      padding: 2rem;
+    }
+    input, button {
+      width: 100%;
+      padding: 0.6rem;
+      margin-top: 1rem;
+      font-size: 1rem;
+    }
+    pre {
+      margin-top: 2rem;
+      background: #f4f4f4;
+      padding: 1rem;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <h2>Solar Potential Demo</h2>
+  <form id="solarForm">
+    <label>Enter street address:</label>
+    <input id="addr" required placeholder="15 Denman St, Alderley QLD"/>
+    <button type="submit">Analyse</button>
+  </form>
+
+  <pre id="result" style="white-space:pre-wrap;"></pre>
+
+  <script>
+    const HOOK = "https://hook.eu2.make.com/z0lszmei1rubnx9i1g197o26q38z2vzl; 
+
+    document.getElementById("solarForm").addEventListener("submit", async e => {
+      e.preventDefault();
+      const address = document.getElementById("addr").value.trim();
+      document.getElementById("result").textContent = "⏳ Running analysis…";
+
+      try {
+        const r = await fetch(HOOK, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ address })
+        });
+        const data = await r.json(); // Only works if Make webhook responds with data
+        document.getElementById("result").textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        document.getElementById("result").textContent = "❌ Error: " + err.message;
+      }
+    });
+  </script>
+</body>
+</html>
