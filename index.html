@@ -27,6 +27,8 @@
 <body>
   <h2>Solar Potential Demo</h2>
   <form id="solarForm">
+    <label>Enter your email address:</label>
+    <input id="email" type="email" required placeholder="example@example.com"/>
     <label>Enter street address:</label>
     <input id="addr" required placeholder="15 Denman St, Alderley QLD"/>
     <button type="submit">Analyse</button>
@@ -39,11 +41,12 @@
 
     document.getElementById("solarForm").addEventListener("submit", async e => {
       e.preventDefault();
+      const email = document.getElementById("email").value.trim();
       const address = document.getElementById("addr").value.trim();
 
-      // Check if address is empty
-      if (!address) {
-        document.getElementById("result").textContent = "Please enter an address.";
+      // Check if email or address is empty
+      if (!email || !address) {
+        document.getElementById("result").textContent = "Please enter both email and address.";
         return;
       }
 
@@ -57,10 +60,10 @@
         const r = await fetch(HOOK, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ address })
+          body: JSON.stringify({ email, address })
         });
 
-        // Check if the response status is not OK (e.g., 400, 500)
+        // Check if the response status is not OK
         if (!r.ok) {
           const errorText = await r.text();
           throw new Error(`Webhook error: ${r.status} - ${errorText}`);
